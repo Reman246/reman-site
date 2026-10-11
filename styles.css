@@ -113,7 +113,7 @@ a { color: inherit; }
 .tile:hover .lbl::after { opacity: 1; }
 
 /* inner pages */
-.doc { max-width: 760px; padding-block: clamp(24px, 5vw, 64px) 72px; }
+.doc { max-width: 1000px; padding-block: clamp(24px, 5vw, 64px) 72px; }
 .doc h1 { font-family: var(--sans); font-weight: 500; font-stretch: 115%; letter-spacing: -0.01em; font-size: clamp(40px, 5vw, 60px); line-height: 1; letter-spacing: -0.01em; margin: 0 0 28px; }
 .doc .intro { font-size: 15px; color: var(--ink); max-width: 58ch; margin: 0 0 44px; }
 .doc section { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 28px; padding-block: 18px; border-top: 1px dashed var(--line-2); }
@@ -123,10 +123,17 @@ a { color: inherit; }
 
 .prose p { font-size: 16.5px; line-height: 1.7; max-width: 58ch; margin: 0 0 20px; }
 
+/* images sit in a column beside the text, level with the paragraph that follows them */
+.prose { max-width: 1000px; }
+.prose::after { content: ""; display: block; clear: both; }
 .img-slot {
-  display: grid; place-items: center; aspect-ratio: 16 / 10; width: 400px; max-width: 100%; margin: 40px 0;
+  float: right; clear: right; display: grid; place-items: center; aspect-ratio: 16 / 10;
+  width: 340px; max-width: 100%; margin: 6px 0 24px 40px;
   border: 1px dashed var(--line-2); border-radius: 6px; background: var(--tile);
   color: var(--ink-3); font-size: 14px;
+}
+@media (max-width: 960px) {
+  .img-slot { float: none; width: 400px; margin: 28px 0; }
 }
 
 /* faq */
