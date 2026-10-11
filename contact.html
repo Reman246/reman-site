@@ -29,20 +29,46 @@
       <h1>Contact</h1>
       <p class="intro">For pricing, site visits and questions.</p>
       <form id="contact" novalidate>
-        <div class="field"><label for="c-name">Name</label><input id="c-name" name="name" autocomplete="name"></div>
-        <div class="field"><label for="c-email">Email</label><input id="c-email" name="email" type="email" autocomplete="email"></div>
-        <div class="field full"><label for="c-org">Company</label><input id="c-org" name="org" autocomplete="organization"></div>
-        <div class="field full"><label for="c-msg">Message</label><textarea id="c-msg" name="msg"></textarea></div>
-        <button class="btn fill" type="submit">Send</button>
+        <div class="field"><label for="c-name">Name</label><input id="c-name" name="name" autocomplete="name" required></div>
+        <div class="field"><label for="c-email">Email</label><input id="c-email" name="email" type="email" autocomplete="email" required></div>
+        <div class="field full"><label for="c-org">Company</label><input id="c-org" name="company" autocomplete="organization"></div>
+        <div class="field full"><label for="c-msg">Message</label><textarea id="c-msg" name="message" required></textarea></div>
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+        <button class="btn fill" type="submit" id="c-send">Send</button>
         <p class="msg" id="c-out" hidden role="status"></p>
       </form>
       <script>
-      document.getElementById("contact").addEventListener("submit", e => {
+      // Messages are forwarded to the company inbox by FormSubmit.
+      const ENDPOINT = "https://formsubmit.co/ajax/remaninnovations@protonmail.com";
+      document.getElementById("contact").addEventListener("submit", async e => {
         e.preventDefault();
-        const f = e.target, out = document.getElementById("c-out");
-        const ok = f.elements.name.value.trim() && /^\S+@\S+\.\S+$/.test(f.elements.email.value.trim());
-        out.textContent = ok ? "This form is not connected yet. Nothing was sent." : "Enter your name and a valid email.";
+        const f = e.target, out = document.getElementById("c-out"), btn = document.getElementById("c-send");
+        const v = n => f.elements[n].value.trim();
         out.hidden = false;
+        if (!v("name") || !/^\S+@\S+\.\S+$/.test(v("email")) || !v("message")) {
+          out.textContent = "Enter your name, a valid email and a message.";
+          return;
+        }
+        if (v("_honey")) return;
+        btn.disabled = true; btn.textContent = "Sending…"; out.textContent = "";
+        try {
+          const res = await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({
+              name: v("name"), email: v("email"), company: v("company"), message: v("message"),
+              _subject: "Website message from " + v("name"), _replyto: v("email"), _template: "table"
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || String(data.success) === "false") throw new Error(data.message || res.status);
+          f.reset();
+          out.textContent = "Message sent. We'll get back to you soon.";
+        } catch (err) {
+          out.textContent = "Your message couldn't be sent. Please email remaninnovations@protonmail.com instead.";
+        } finally {
+          btn.disabled = false; btn.textContent = "Send";
+        }
       });
       </script>
     </div>
